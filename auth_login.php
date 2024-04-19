@@ -6,17 +6,6 @@ if (!defined('index_origin'))
 }
 ?>
 <?php
-	function generateRandomString($length = 50) {
-                $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!-+.';
-                $charactersLength = strlen($characters);
-                $randomString = '';
-                for ($i = 0; $i < $length; $i++) {
-                        $randomString .= $characters[rand(0, $charactersLength - 1)];
-                        }
-                return $randomString;
-                }
-?>
-<?php
 	if (!isset($_POST['loginuser']) || !isset($_POST['loginpassword']))
 	{
 		http_response_code(400);
@@ -26,6 +15,16 @@ if (!defined('index_origin'))
 	{
 		$username = $_POST['loginuser'];
 		$password = $_POST['loginpassword'];
+
+		function generateRandomString($length = 50) {
+                	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!-+.';
+	                $charactersLength = strlen($characters);
+        	        $randomString = '';
+                	for ($i = 0; $i < $length; $i++) {
+                        	$randomString .= $characters[rand(0, $charactersLength - 1)];
+	                        }
+	                return $randomString;
+        	        }
 	}
 
 	$queryhash = "SELECT password FROM user WHERE name = ?;";
@@ -34,11 +33,16 @@ if (!defined('index_origin'))
         mysqli_stmt_execute($prephash);
         $resulthash = mysqli_stmt_get_result($prephash);
 
+	$result_count = mysqli_num_rows($resultsession);
+
+	if ($result_count = '1')
+        {
+
         while ($row = $resulthash->fetch_assoc()) {
                 $hash = $row['password'];
         }
 
-	if (password_verify($password,"$hash"))
+	if (password_verify($password,$hash))
 	{
 		$querypresentsession = "SELECT sessionid FROM auth_sessions INNER JOIN user ON auth_sessions.userid = user.id WHERE user.name = ? AND api = '1' LIMIT 1;";
       		$preppresentsession = mysqli_prepare($db, $querypresentsession);
@@ -51,7 +55,7 @@ if (!defined('index_origin'))
 		{
 			$presentsessionrow = mysqli_fetch_array($resultpresentsession);
 			$presentsession = $presentsessionrow['sessionid'];
-			#echo json_encode($presentsession);
+			echo $presentsession;
 		}
 		else
 		{
@@ -63,12 +67,18 @@ if (!defined('index_origin'))
 	        	mysqli_stmt_execute($prepaddsession);
 		        $resultaddsession = mysqli_stmt_get_result($prepaddsession);
 
-			#echo json_encode($sessionid);
+			echo $sessionid;
         	}
 	}
 	else
         {
-			http_response_code(401);
+			http_response_code(400);
 	                die();
+	}
+	}
+	else
+	{
+		http_response_code(400);
+	        die();
 	}
 ?>

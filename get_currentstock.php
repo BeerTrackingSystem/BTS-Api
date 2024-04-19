@@ -1,4 +1,12 @@
 <?php
+if (!defined('index_origin'))
+{
+        http_response_code(404);
+        die();
+}
+?>
+
+<?php
 	$querycurrentstock = "SELECT amount FROM current_stock WHERE id = '1';";
 	$prepcurrentstock = mysqli_prepare($db, $querycurrentstock);
 	mysqli_stmt_bind_param ($prepcurrentstock);
